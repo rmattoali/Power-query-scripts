@@ -1,0 +1,35 @@
+let
+    // Automatically refer to the current workbook's data table
+    Source = Excel.CurrentWorkbook(){[Name="Table1"]}[Content],  // Replace "YourTableName" with the actual table name
+
+    // STEP 2: Set correct data types
+    #"Changed Type" = Table.TransformColumnTypes(Source,{
+        {"First Name", type text}, 
+        {"Last Name", type text}, 
+        {"Position", type text}, 
+        {"Business Email1", type text},  
+        {"Mobile Phone1", type any}, 
+        {"Mobile Phone2", type any},  
+        {"LinkedIn Link", type text}
+    }),
+
+    // STEP 3: List of phone columns to clean
+    PhoneColumns = {
+        "Mobile Phone1", "Mobile Phone2"
+    },
+
+    // STEP 4: Clean phone columns safely by calling CleanPhoneNumber function
+    CleanedPhones = Table.TransformColumns(
+        #"Changed Type",
+        List.Transform(
+            PhoneColumns,
+            each {_, CleanPhoneNumber, type nullable text}
+        )
+    )
+
+// STEP 5: Output result
+in
+    CleanedPhones
+
+
+
