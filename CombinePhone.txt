@@ -1,0 +1,5 @@
+= Table.AddColumn(CleanedPhones, "Mobile", each 
+    if [Mobile Phone1] = null then [Mobile Phone2]
+    else if [Mobile Phone2] = null then [Mobile Phone1]
+    else [Mobile Phone1] & "/" & [Mobile Phone2]
+)
