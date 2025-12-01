@@ -1,0 +1,36 @@
+= (phone as any) as nullable text =>
+let
+    // STEP 1: Ensure phone is not null before converting
+    PhoneText = if phone = null then null else Text.From(phone),
+
+    // STEP 2: Remove non-numeric characters (strip anything except 0-9)
+    Cleaned = if PhoneText = null then null else Text.Select(PhoneText, {"0".."9"}),
+
+    // STEP 3: Check if it's an Australian or NZ number
+    IsAussie = 
+        Text.StartsWith(Cleaned, "04") or 
+        Text.StartsWith(Cleaned, "61") or 
+        List.Contains({"02","03","07","08"}, Text.Start(Cleaned, 2)),
+
+    IsNZ = 
+        Text.StartsWith(Cleaned, "02") or 
+        Text.StartsWith(Cleaned, "64"),
+
+    // STEP 4: Normalize
+    Result = 
+        if Cleaned = null then 
+            null
+        else if Text.StartsWith(Cleaned, "4") then 
+            "614" & Text.Middle(Cleaned, 1)
+        else if Text.StartsWith(Cleaned, "04") then 
+            "61" & Text.Middle(Cleaned, 1)
+        else if Text.StartsWith(Cleaned, "02") then 
+            "64" & Text.Middle(Cleaned, 1)
+        else if Text.StartsWith(Cleaned, "+44") then 
+            null  // Remove UK number
+        else if IsAussie or IsNZ then 
+            Cleaned
+        else 
+            null
+in
+    Result
